@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Upload trace</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="container theme-showcase" role="main">
+  <div class="page-header">
+    <h1>Upload your trace here</h1>
+  </div>
+  <div class="alert alert-info">
+    Uploaded traces are kept on the server after the analysis. For further information, please contact Quentin De Coninck &lt;quentin.deconinck@uclouvain.be&gt;.
+  </div>
+  <div class="row">
+    <form method="post" id="uploadForm" method="POST" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table>
+          <tr>
+            <td><label>Your trace:</label></td>
+            <td><input type="file" id="trace" name="trace"/></td>
+          </tr>
+        </table>
+        <input type="button" name="submit" class="uploadTrace btn btn-default" value="Upload" />
+        <div id="uploadMsg"></div>
+    </form>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+   }
+   return cookieValue;
+}
+
+$(document).on('click', '.uploadTrace', function(e) {
+    // Block the default behavior:
+    e.preventDefault();
+    var button = $(this);
+    button.attr('disabled', true);
+    var data = new FormData($('#uploadForm').get(0));
+    var csrftoken = $("input[name=csrfmiddlewaretoken]").val();
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+
+    });
+    $.ajax({
+      url: $("#uploadForm").attr('action'),
+      type: $("#uploadForm").attr('method'),
+      data: data,
+      cache: false,
+      processData: false,
+      contentType: false,
+      success: function(data) {
+            if (data.result == "OK") {
+              console.log(data.result)
+              $("#uploadMsg").html("Upload done");
+              alert('success');
+              button.attr('disabled', false);
+            }
+            else {
+              $("#uploadMsg").html(data.result);
+              alert(data.result);
+              button.attr('disabled', false);
+            }
+      },
+      error: function() {
+            $("#uploadMsg").html("An error occured");
+            alert('An error occured, please contact the administrator');
+            button.attr('disabled', false);
+      }
+    });
+    $("#uploadMsg").html("Please wait");
+    return false;
+});
+</script>
+{% endblock %}

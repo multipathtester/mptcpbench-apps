@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Details for smartphone traces</title>
+{% load staticfiles %}
+<link href="{% static 'bokeh/css/bokeh-0.12.3.min.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'bokeh/css/bokeh-widgets-0.12.3.min.css' %}" rel="stylesheet" type="text/css">
+
+<script src="{% static 'bokeh/js/bokeh-0.12.3.min.js' %}"></script>
+<script src="{% static 'bokeh/js/bokeh-widgets-0.12.3.min.js' %}"></script>
+<meta id="bokeh_graph_script"></meta>
+{% endblock %}
+
+{% block content %}
+
+<div class="container theme-showcase" role="main">
+  <div class="page-header">
+    <h1>Smartphone stats</h1>
+  </div>
+  <div class="page-header">
+    <h1>A few graphs</h1>
+  </div>
+  <div class="row">
+    {% csrf_token %}
+    <form method="POST">
+      <select name="menu_exp" id="getExpValue">
+              <option value="simple_http_get">Simple HTTP Get</option>
+              <option value="siri">Siri</option>
+              <option value="msg">Instant Messaging</option>
+      </select>
+      <select name="menu_data" id="getDataValue">
+            <option value="time">Completion Time</option>
+            <option value="perc_cellular">Percentage of bytes on cellular</option>
+            <option value="perc_pkt_cellular">Percentage of packets on cellular</option>
+            <option value="open_cellular">Percentage of time cellular is open</option>
+            <option value="delays">Delay</option>
+            <option value="max_delay">Max Delay</option>
+            <option value="missed">Missed</option>
+            <option value="cell_energy_total">Total Cellular Energy Consumption</option>
+            <option value="cell_mean_power">Mean Cellular Power Consumption</option>
+      </select>
+      <select name="menu_server" id="getServerValue">
+            <option value="mptcp_1">MPTCP 1</option>
+            <option value="mptcp_2">MPTCP 2</option>
+            <option value="all">All</option>
+      </select>
+      <select name="menu_graph" id="getGraphValue">
+            <option value="boxplot">Boxplot</option>
+            <option value="cdf">CDF</option>
+            <option value="cdf_log">CDF in Log Scale</option>
+      </select>
+      <select name="menu_select" id="getSelectValue">
+            <option value="valid">Valid</option>
+            <option value="valid-correct_server">Valid with correct server</option>
+            <option value="static">Static</option>
+            <option value="mobile">Mobile</option>
+      </select>
+      <input type="button" name="get-graph" class="getGraph" value="Get Graph">
+    </form>
+  </div>
+  <div id="bokeh_graph_div" class="row"></div>
+</div>
+
+{% load staticfiles %}
+
+<script type="text/javascript">
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+   }
+   return cookieValue;
+}
+
+$(document).on('click', '.getGraph', function(e) {
+    // Block the default behavior:
+    e.preventDefault();
+    var exp = $("#getExpValue").val();
+    var data_name = $("#getDataValue").val();
+    var server_name = $("#getServerValue").val();
+    var graph_name = $("#getGraphValue").val();
+    var select_name = $("#getSelectValue").val();
+    var csrftoken = $("input[name=csrfmiddlewaretoken]").val();
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+
+    });
+    $.post("get_graph/",
+    {
+        'exp': exp,
+        'data_name': data_name,
+        'server_name': server_name,
+        'graph_name': graph_name,
+        'select_name': select_name,
+    },
+    function(data, status){
+        if (status == "success") {
+            // First clear the figure, then draw the plot
+            $("#bokeh_graph_script").empty();
+            $("#bokeh_graph_div").empty();
+            // First put the div, then the script
+            $("#bokeh_graph_div").html(data.div)
+            $("#bokeh_graph_script").html(data.script)
+        }
+        else {
+          alert(data.result);
+        }
+    });
+});
+</script>
+
+{% endblock %}

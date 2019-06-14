@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Connectivity Results</title>
+{% load staticfiles %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container theme-showcase" role="main">
+  <div class="page-header">
+    <h1>Connectivity Results</h1>
+  </div>
+  <table class="table table-striped">
+    <tr>
+      <th>Time</th>
+      <th>URL</th>
+      <th>Success</th>
+      </tr>
+      {% for cr in connectivityresult_list %}
+      <tr>
+        <td>{{ cr.smartphonetest.start_time }}</td>
+        <td>{{ cr.smartphonetest.bench.connectivitybench.url }}</td>
+        <td>{{ cr.success }}</td>
+      </tr>
+      {% endfor %}
+  </table>
+  {# .... **Now the pagination section** .... #}
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+</div>
+
+{% load staticfiles %}
+
+{% endblock %}

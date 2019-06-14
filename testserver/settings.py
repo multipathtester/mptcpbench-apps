@@ -1,0 +1,2 @@
+COLLECT_SERVER_URL = "localhost:8000"
+TEST_SERVER_URL = "localhost:8000"

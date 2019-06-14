@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Details for smartphone traces</title>
+{% load staticfiles %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container theme-showcase" role="main">
+  <div class="page-header">
+    <h1>Msg results for ID {{ result_id }}</h1>
+  </div>
+  <div class="page-header">
+    <h1>Delays</h1>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <tr>
+        <th>ID</th>
+        <th>Delay</th>
+      </tr>
+      {% for delay in delays %}
+      <tr>
+        <td>{{ delay.id }}</td>
+        <td>{{ delay.delay }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="page-header">
+    <h1>Proto info</h1>
+  </div>
+  <div class="row">
+    <pre>
+      {{ proto_info }}
+    </pre>
+  </div>
+</div>
+
+{% load staticfiles %}
+
+{% endblock %}

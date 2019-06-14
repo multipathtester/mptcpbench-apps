@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Welcome on the MPTCP collector</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="container theme-showcase" role="main">
+  <div class="page-header">
+    <h1>Multipath TCP collector</h1>
+  </div>
+  <div class="row">
+    This website allows you to upload PCAP traces containing Multipath TCP packets to get analysis on them.
+  </div>
+  <div class="page-header">
+  </div>
+  <div class="row">
+    <div class="col-sm-6 col-md-5 text-center">
+      <a href="{% url 'no_test_upload' %}" class="btn btn-lg btn-primary" role="button">Upload traces</a>
+    </div>
+    <div class="col-sm-6 col-md-5 text-center">
+      <a href="no_test_results/{{ user.email }}/" class="btn btn-lg btn-info" role="button">See trace results</a>
+    </div>
+  </div>
+</div>
+
+<script>
+$('#get_results').submit(function(){
+  $("#get_results").attr("action", "/collect/no_test_results/" + $("#uploader_email").val());
+});
+</script>
+{% endblock %}

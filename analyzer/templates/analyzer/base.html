@@ -1,0 +1,71 @@
+
+<html>
+  <head>
+    {% load staticfiles %}
+    <link href="{% static 'flatly/css/bootstrap.min.css' %}"
+          rel="stylesheet" media="screen">
+    {% block head %}
+    {% endblock %}
+  </head>
+
+  <body>
+    {% load staticfiles %}
+    <script src="{% static 'jquery/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <a class="navbar-brand" href="#">MultipathTester Analyzer</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation" style="">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarColor01">
+        <ul class="navbar-nav mr-auto">
+          {% block navbar %}
+          {% endblock %}
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li class="navitem dropdown show">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                {% if user.is_authenticated %}
+                  Logged as {{ user.username }}
+                {% else %}
+                  Not logged
+                {% endif %}
+                  <span class="caret"></span>
+              </a>
+              {% if user.is_authenticated %}
+                <ul class="dropdown-menu" role="menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 40px, 0px); top: 0px; left: 0px; will-change: transform;">
+                  <li>
+                    <a class="dropdown-item" href="/analyzer">Home</a>
+                  </li>
+                  <div class="dropdown-divider"></div>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                  </li>
+                </ul>
+              {% endif %}
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+
+      <div class='sidebar-wrapper'>
+        <ul class="sidebar-nav list-group">
+          {% block sidebar-left %}
+          {% endblock %}
+        </ul>
+      </div>
+
+      <div class="main-content">
+        {% block content %}
+        {% endblock %}
+      </div>
+      <hr>
+      <footer>
+        <p>Developed and maintained by Quentin De Coninck &lt;quentin.deconinck _at_ uclouvain.be&gt; </p>
+      </footer>
+    </div>
+  </body>
+</html>

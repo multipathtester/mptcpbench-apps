@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container theme-showcase" role="main">
+  <div class="page-header">
+    <h1>Multipath TCP collector</h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        <p class="text-center">Your username and password didn't match. Please try again.</p>
+      </div>
+      {% endif %}
+
+      {% if next %}
+          {% if user.is_authenticated %}
+          <div class="alert alert-warning">
+            <p class="text-center">Your account doesn't have access to this page. To proceed, please login with an account that has access.</p>
+          </div>
+          {% else %}
+          <div class="alert alert-info">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <p class="text-center">Please login to see this page.</p>
+          </div>
+          {% endif %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="row">
+
+  </div>
+
+    <div class="row">
+      <div class="col-lg-6 text-center">
+        <div>
+          <h2>Already registered?</h2>
+        </div>
+        <div class="text-center">
+          <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          <table>
+          <tr>
+              <td>{{ form.username.label_tag }}</td>
+              <td>{{ form.username }}</td>
+          </tr>
+          <tr>
+              <td>{{ form.password.label_tag }}</td>
+              <td>{{ form.password }}</td>
+          </tr>
+          </table>
+
+          <div style="height:20px;"></div>
+
+          <input class="btn btn-lg btn-info" type="submit" value="Login" />
+          <input type="hidden" name="next" value="{{ next }}" />
+          </form>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div>
+          <h2>New on this website?</h2>
+        </div>
+        <div class="text-center">
+          <a href="{% url 'sign_up' %}" class="center-block btn btn-lg btn-success" role="button">Sign up </a>
+        </div>
+      </div>
+    </div>
+    <div style="height:20px;"></div>
+    {# Assumes you setup the password_reset view in your URLconf #}
+    <!--
+    <p><a href="'password_reset'">Lost password?</a></p>
+    -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="alert alert-info">
+          <p class="text-center"> Please note that password recovery is not yet implemented.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

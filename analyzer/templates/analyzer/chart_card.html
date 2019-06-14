@@ -1,0 +1,25 @@
+{% load js %}
+<div class="bs-component">
+  <div class="card border-primary mb-6" style="max-width: 50rem; min-height: 600px;">
+  <div class="card-header">{{ chart.card_title }}</div>
+  <div class="card-body">
+    <!--<h4 class="card-title">Stream upload (lower max delay wins)</h4>-->
+    <p class="card-text">
+      <div id="graph-{{ id }}"></div>
+      <script type="text/javascript">
+      {% if chart.type == "bar" %}
+        new Chartkick.BarChart("graph-{{ id }}", {{ chart.data | js }}, {{ chart.library | js }})
+      {% elif chart.type == "line" %}
+        Highcharts.chart("graph-{{ id }}", {{ chart.library | js }})
+      {% elif chart.type == "scatter" %}
+        Highcharts.chart("graph-{{ id }}", {{ chart.library | js }})
+      {% elif chart.type == "line-chartkick" %}
+        new Chartkick.LineChart("graph-{{ id }}", {{ chart.data | js }}, {{ chart.library | js }})
+      {% elif chart.type == "scatter-chartkick" %}
+        new Chartkick.ScatterChart("graph-{{ id }}", {{ chart.data | js }}, {{ chart.library | js }})
+      {% endif %}
+      </script>
+    </p>
+  </div>
+  </div>
+</div>

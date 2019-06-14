@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Details for {{ test.trace.user_name }}</title>
+{% load staticfiles %}
+<link href="{% static 'bokeh/css/bokeh-0.12.3.min.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'bokeh/css/bokeh-widgets-0.12.3.min.css' %}" rel="stylesheet" type="text/css">
+
+<script src="{% static 'bokeh/js/bokeh-0.12.3.min.js' %}"></script>
+<script src="{% static 'bokeh/js/bokeh-widgets-0.12.3.min.js' %}"></script>
+<meta id="bokeh_graph_script"></meta>
+{% endblock %}
+
+{% block navbar %}
+<div class="navbar-brand"><a href="/collect/no_test_results/{{ test.uploader_email }}">Go back to your traces</a></div>
+{% endblock %}
+
+{% block content %}
+
+<div class="container theme-showcase" role="main">
+  <div class="page-header">
+    <h1>Global stats</h1>
+  </div>
+  <div class="row">
+    <table class="table">
+      <thead>
+        <tr>
+          <th># Connections</th>
+          <th># Multisubflow connections</th>
+          <th>% Multisubflow connections</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ count_conns }}</td>
+          <td>{{ count_conns_multipath }}</td>
+          <td>{{ perc_multipath_conns }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="row">
+    <h2>Subflows per connection</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th># Subflows</th>
+          <th># connections</th>
+          <th>% connections</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sf_count_item in sf_count_list %}
+        <tr>
+          <td>{{ sf_count_item|get_item:'nb_sf' }}</td>
+          <td>{{ sf_count_item|get_item:'nb_conns' }}</td>
+          <td>{{ sf_count_item|get_item:'perc_conns' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="row">
+    <h2>Subflow usage</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th># Subflows</th>
+          <th># Additional subflows</th>
+          <th>% Subflows unused</th>
+          <th>% Additional unused subflows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ count_sfs }}</td>
+          <td>{{ count_additional_sfs }}</td>
+          <td>{{ perc_unused_sfs }}</td>
+          <td>{{ perc_additional_unused_sfs }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="table">
+      <thead>
+        <tr>
+          <th># Cellular subflows</th>
+          <th># Additional cellular subflows</th>
+          <th>% Unused cellular subflows</th>
+          <th>% Unused additional cellular subflows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ count_cell_sfs }}</td>
+          <td>{{ count_additional_cell_sfs }}</td>
+          <td>{{ perc_unused_cell_sfs }}</td>
+          <td>{{ perc_unused_additional_cell_sfs }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-header">
+    <h1>Per-flow stats</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2>Client to Server flow</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th># Packets</th>
+            <th># Unique bytes</th>
+            <th># Total bytes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ c2s|get_item:'nb_packets' }}</td>
+            <td>{{ c2s|get_item:'nb_bytes' }}</td>
+            <td>{{ c2s|get_item:'nb_bytes_data' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-6">
+      <h2>Server to Client flow</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th># Packets</th>
+            <th># Unique bytes</th>
+            <th># Total bytes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ s2c|get_item:'nb_packets' }}</td>
+            <td>{{ s2c|get_item:'nb_bytes' }}</td>
+            <td>{{ s2c|get_item:'nb_bytes_data' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page-header">
+    <h1>A few graphs</h1>
+  </div>
+  <div class="row">
+      {% csrf_token %}
+      <form method="POST">
+      <select name="menu_destination" id="getGraphValue">
+            <option value="duration">CDF of connection durations</option>
+            <option value="mptcptrace_bytes_c2s">CDF of connection bytes in C2S flow</option>
+            <option value="mptcptrace_bytes_s2c">CDF of connection bytes in S2C flow</option>
+            <option value="delay_mpjoin_mpcapable">CDF of additional subflow establishment delays</option>
+            <option value="rtt_difference_sfs_c2s">CDF of subflow RTT differences in C2S flow</option>
+            <option value="rtt_difference_sfs_s2c">CDF of subflow RTT differences in S2C flow</option>
+            <option value="size_subflow_blocks_c2s">CDF of subflow block sizes in C2S flow</option>
+            <option value="size_subflow_blocks_s2c">CDF of subflow block sizes in S2C flow</option>
+            <option value="bytes_by_ip_c2s_sent">Bytes sent by IP in C2S flow</option>
+            <option value="bytes_by_ip_s2c_sent">Bytes sent by IP in S2C flow</option>
+            <option value="bytes_by_ip_c2s_received">Bytes received by IP in C2S flow</option>
+            <option value="bytes_by_ip_s2c_received">Bytes received by IP in S2C flow</option>
+      </select>
+      <input type="button" name="get-graph" class="getGraph" value="Get Graph">
+    </form>
+  </div>
+  <div id="bokeh_graph_div" class="row"></div>
+</div>
+
+{% load staticfiles %}
+
+<script type="text/javascript">
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+   }
+   return cookieValue;
+}
+
+$(document).on('click', '.getGraph', function(e) {
+    // Block the default behavior:
+    e.preventDefault();
+    var graph_type = $("#getGraphValue").val();
+    var csrftoken = $("input[name=csrfmiddlewaretoken]").val();
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+
+    });
+    $.post("get_graph/",
+    {
+        'graph_type': graph_type,
+    },
+    function(data, status){
+        if (status == "success") {
+            // First clear the figure, then draw the plot
+            $("#bokeh_graph_script").empty();
+            $("#bokeh_graph_div").empty();
+            // First put the div, then the script
+            $("#bokeh_graph_div").html(data.div)
+            $("#bokeh_graph_script").html(data.script)
+        }
+    });
+});
+</script>
+
+{% endblock %}
